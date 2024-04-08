@@ -1,32 +1,12 @@
-Template...
-
-
-# Project Name
+# Software Testing to improve the Cognitive-Affective Map tools
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Description
 
-A brief description of your project.
+The following repository contains all files presented in the YouTube Video (XXX). The materials are suspected to change during the development of the CAM tools (like adjustable testing materials).
 
-## Table of Contents
+Thank you for improving the developed Cognitive-Affective Map tools.
 
-- [Installation](#installation)
-- [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
-
-## Installation
-
-Instructions on how to install and run your project.
-
-## Usage
-
-Examples and instructions on how to use your project.
-
-## Contributing
-
-Guidelines for contributing to your project.
 
 ## License
 
