@@ -1,6 +1,6 @@
-# Fundamentals of Browsers (HTML, CSS, JavaScript)
+# Examples (HTML, CSS, JavaScript)
 
-This repository contains resources and examples to help you understand the fundamentals of browsers, including HTML, CSS, and JavaScript.
+This repository contains examples to help you understand the fundamentals of browsers, including HTML, CSS, and JavaScript.
 
 ## Table of Contents
 
