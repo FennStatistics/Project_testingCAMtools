@@ -30,7 +30,10 @@ Download the word or PDF file:
 
 ## Data Analysis: CAM-App
 
-...
+Download the word or PDF file: 
+
+- [Word file](./data%20analysis%20CAM-App.docx)
+- [PDF file](./data%20analysis%20CAM-App.pdf)
 
 
 ## administrative panel (webpage)
@@ -38,7 +41,7 @@ Download the word or PDF file:
 Download the word or PDF file: 
 
 - [Word file](./administrative%20panel%20(webpage).docx)
-- [Word file](./administrative%20panel%20(webpage).docx)
+- [PDF file](./administrative%20panel%20(webpage).pdf)
 
 
 ## License
