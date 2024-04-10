@@ -7982,3 +7982,30 @@ JavaScript error: https://camgalaxy.github.io/src/js/backend/initialisation.js, 
 1710861222525	addons.xpi	ERROR	System addon update list error SyntaxError: XMLHttpRequest.open: 'http://%(server)s/dummy-system-addons.xml' is not a valid URL.
 1710863354976	Marionette	INFO	Stopped listening on port 61960
 Dynamically enable window occlusion 1
+1712575570441	geckodriver	INFO	Listening on 127.0.0.1:51274
+1712575573514	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "51275" "-no-remote" "-profile" "C:\\Users\\fenn\\AppData\\Local\\Temp\\rust_mozprofileOdqYGV"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1712575574823	Marionette	INFO	Marionette enabled
+Dynamically enable window occlusion 0
+1712575574946	Marionette	INFO	Listening on port 51284
+WebDriver BiDi listening on ws://127.0.0.1:51275
+1712575575259	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+DevTools listening on ws://127.0.0.1:51275/devtools/browser/e5f05140-9df6-4101-ad47-480a10f130eb
+JavaScript error: https://camgalaxy.github.io/src/js/backend/initialisation.js, line 54: ReferenceError: defaultCAM is not defined
+1712575605050	addons.xpi	ERROR	System addon update list error SyntaxError: XMLHttpRequest.open: 'http://%(server)s/dummy-system-addons.xml' is not a valid URL.
+JavaScript error: , line 0: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+JavaScript error: , line 0: NS_ERROR_NOT_AVAILABLE
+JavaScript error: resource://gre/modules/AsyncShutdown.sys.m1712579707072	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "--marionette" "--remote-debugging-port" "53097" "-no-remote" "-profile" "C:\\Users\\fenn\\AppData\\Local\\Temp\\rust_mozprofileXAhHFE"
+console.warn: services.settings: Ignoring preference override of remote settings server
+console.warn: services.settings: Allow by setting MOZ_REMOTE_SETTINGS_DEVTOOLS=1 in the environment
+1712579707493	Marionette	INFO	Marionette enabled
+Dynamically enable window occlusion 0
+1712579707589	Marionette	INFO	Listening on port 53105
+WebDriver BiDi listening on ws://127.0.0.1:53097
+1712579707635	RemoteAgent	WARN	TLS certificate errors will be ignored for this session
+DevTools listening on ws://127.0.0.1:53097/devtools/browser/c3c26297-be49-4556-995f-6ef8d9799596
+1712579738918	addons.xpi	ERROR	System addon update list error SyntaxError: XMLHttpRequest.open: 'http://%(server)s/dummy-system-addons.xml' is not a valid URL.
+JavaScript error: resource://gre/modules/AsyncShutdown.sys.mjs, line 570: NotFoundError: No such JSWindowActor 'DevToolsFrame'
+1712579782392	Marionette	INFO	Stopped listening on port 53105
+Dynamically enable window occlusion 1
