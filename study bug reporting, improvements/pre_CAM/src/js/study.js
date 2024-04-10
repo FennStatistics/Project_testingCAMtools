@@ -309,7 +309,7 @@ const FeedbackScreen_htmlScreen = new lab.html.Form({
 
         // redirect
         jatos.endStudyAndRedirect(
-          "https://drawyourminds.de/", // !!!
+          "https://dashboard-vercel-8aen53m4y-fennstatistics.vercel.app/", // !!!
           true,
           "everything worked fine"
         );
