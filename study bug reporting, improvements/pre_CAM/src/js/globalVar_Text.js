@@ -63,6 +63,14 @@ report a possible <b>improvement</b>
   </td>
 </tr>
 
+<tr style="height: 100px">
+<td class="text-left" colspan="2">
+Important remark: if you want to <b>report only a spelling error</b>, please do not use this form and add the error to our Goole Docs: 
+<a href="https://docs.google.com/document/d/1hxf0FJ9q2UgfFfA05zyeAWRW1ixTXbOfwnHs4BeWXmc/edit?usp=sharing" target="_blank">Spelling Errors</a>
+</td>
+</tr>
+
+
 <!-- tool -->
 <tr style="height: 100px">
   <td class="text-left">
