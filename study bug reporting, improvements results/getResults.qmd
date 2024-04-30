@@ -1,0 +1,219 @@
+---
+title: "Get results of study bug reporting, improvements"
+author: "Julius Fenn"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    html-math-method: katex
+    number-sections: true
+---
+
+# Notes
+
+
+# global variables
+
+Define your global variables:
+
+```{r}
+#| label: global variables
+
+
+```
+
+
+# create raw data files
+
+
+
+```{r}
+#| label: create raw files
+#| warning: false
+
+# sets the directory of location of this script as the current directory
+# setwd(dirname(rstudioapi::getSourceEditorContext()$path))
+
+### load packages
+# devtools::install_github('jdwilson4/multilayer_extraction')
+require(pacman)
+p_load('tidyverse', 'jsonlite', 'magrittr', 'xlsx',
+       'stargazer', 'psych', 'jtools', 'DT', 'ggstatsplot', 
+       'ggplot2',
+       'base64enc')
+ 
+
+### list data files
+setwd("data")
+dir()
+
+suppressMessages(read_file('jatos_results_data_20240430143549.txt') %>%
+  # ... split it into lines ...
+  str_split('\n') %>% first() %>%
+  # ... filter empty rows ...
+  discard(function(x) x == '') %>%
+  # ... parse JSON into a data.frame
+  map_dfr(fromJSON, flatten=TRUE)) -> dat
+
+
+### load functions
+setwd("../functions")
+for(i in 1:length(dir())){
+  # print(dir()[i])
+  source(dir()[i], encoding = "utf-8")
+}
+
+rm(i)
+```
+
+# prepare data
+
+## set up data.frame
+
+```{r}
+########################################
+# create counter variable for data set
+########################################
+dat$ID <- NA
+
+tmp_IDcounter <- 0
+for(i in 1:nrow(dat)){
+  if(!is.na(dat$sender[i]) && dat$sender[i] == "Report"){
+    # tmp <- dat$prolific_pid[i]
+    tmp_IDcounter = tmp_IDcounter + 1
+  }
+  dat$ID[i] <- tmp_IDcounter
+}
+
+
+########################################
+# keep only complete data sets
+########################################
+sum(table(dat$ID) != max(table(dat$ID)))
+sum(table(dat$ID) == max(table(dat$ID)))
+dat <- dat[dat$ID %in% names(table(dat$ID))[table(dat$ID) == max(table(dat$ID))],]
+
+########################################
+# json (from JATOS) to 2D data.frame
+########################################
+tmp_notNumeric <- str_subset(string = colnames(dat), pattern = "^meta")
+tmp_notNumeric <- str_subset(string = tmp_notNumeric, pattern = "labjs|location", negate = TRUE)
+
+# "bug_browser_used_additional"
+# tmp_notNumeric
+
+vec_ques <- c("dummy_type",
+              "bug_tool",
+              
+              "bug_CAMEL_element",
+              "bug_CAMApp_part",
+              "bug_Webpage_part",
+              
+              "bug_browser_used",
+              "automatic_browser", "automatic_browser2",
+              "automatic_browserVersion", "automatic_operatingSystem",
+              
+              "bug_text",
+              "Base64Image",
+              "bug_code",
+              
+              
+              "improvement_tool",
+              
+              "improvement_CAMEL_element",
+              "improvement_CAMEL_text",
+              "improvement_CAMEL_importance",
+              
+              "improvement_CAMApp_part",
+              "improvement_CAMApp_text",
+              "improvement_CAMApp_importance",
+              
+              "improvement_Webpage_part",
+              "improvement_Webpage_text",
+              "improvement_Webpage_importance",
+              
+              
+              "feedback_critic")
+
+vec_notNumeric = vec_ques
+questionnaire <- questionnairetype(dataset = dat, 
+                                        listvars = vec_ques, 
+                                        notNumeric = vec_notNumeric)
+
+dat_pictures <- questionnaire[, c("ID", "Base64Image")]
+dat_pictures$Base64Image <- str_remove_all(string = dat_pictures$Base64Image, pattern = "data:image/png;base64,")
+
+
+
+questionnaire$Base64Image <- NULL
+
+
+```
+
+# reported bugs
+
+
+```{r}
+setwd("outputs")
+
+
+## dynamic table for CAMEL
+tmp_dat <- questionnaire[questionnaire$bug_tool == "CAMEL",]
+tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "improvement", negate = TRUE)]
+tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug_CAMApp_part", "bug_Webpage_part")]
+
+DT::datatable(tmp_dat, options = list(pageLength = 5))
+#> save as .xlsx
+xlsx::write.xlsx2(x = tmp_dat, file = "bugs_CAMEL.xlsx")
+
+## dynamic table for CAMApp
+tmp_dat <- questionnaire[questionnaire$bug_tool == "CAMApp",]
+tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "improvement", negate = TRUE)]
+tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug_CAMEL_element", "bug_Webpage_part")]
+
+DT::datatable(tmp_dat, options = list(pageLength = 5))
+#> save as .xlsx
+xlsx::write.xlsx2(x = tmp_dat, file = "bugs_CAMApp.xlsx")
+
+
+## dynamic table for CAMEL
+tmp_dat <- questionnaire[questionnaire$bug_tool == "Webpage",]
+tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "improvement", negate = TRUE)]
+tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug_CAMEL_element", "bug_CAMApp_part")]
+
+DT::datatable(tmp_dat, options = list(pageLength = 5))
+#> save as .xlsx
+xlsx::write.xlsx2(x = tmp_dat, file = "bugs_Webpage.xlsx")
+```
+
+
+## save screenshots
+
+```{r}
+setwd("outputs/screenshots")
+for(i in 1:nrow(dat_pictures)){
+  if(!is.na(dat_pictures$Base64Image[i])){
+    binary_data <- base64enc::base64decode(what = dat_pictures$Base64Image[i])
+    writeBin(binary_data, paste0(dat_pictures$ID[i], "_screenshot.png"))
+  }
+}
+```
+
+
+
+# reported possible improvements
+
+
+```{r}
+setwd("outputs")
+
+
+## dynamic table for suggested improvements
+tmp_dat <- questionnaire[questionnaire$dummy_type == "improvement",]
+tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "bug", negate = TRUE)]
+tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug")]
+
+DT::datatable(tmp_dat, options = list(pageLength = 5))
+#> save as .xlsx
+xlsx::write.xlsx2(x = tmp_dat, file = "improvements.xlsx")
+```

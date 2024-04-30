@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Julius Fenn">
+
+<title>Get results of study bug reporting, improvements</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="getResults_files/libs/clipboard/clipboard.min.js"></script>
+<script src="getResults_files/libs/quarto-html/quarto.js"></script>
+<script src="getResults_files/libs/quarto-html/popper.min.js"></script>
+<script src="getResults_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="getResults_files/libs/quarto-html/anchor.min.js"></script>
+<link href="getResults_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="getResults_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="getResults_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="getResults_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="getResults_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+<link href="getResults_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="getResults_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="getResults_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+<script src="getResults_files/libs/datatables-binding-0.33/datatables.js"></script>
+<script src="getResults_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<link href="getResults_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+<link href="getResults_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+<script src="getResults_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="getResults_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+<script src="getResults_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#notes" id="toc-notes" class="nav-link active" data-scroll-target="#notes"><span class="header-section-number">1</span> Notes</a></li>
+  <li><a href="#global-variables" id="toc-global-variables" class="nav-link" data-scroll-target="#global-variables"><span class="header-section-number">2</span> global variables</a></li>
+  <li><a href="#create-raw-data-files" id="toc-create-raw-data-files" class="nav-link" data-scroll-target="#create-raw-data-files"><span class="header-section-number">3</span> create raw data files</a></li>
+  <li><a href="#prepare-data" id="toc-prepare-data" class="nav-link" data-scroll-target="#prepare-data"><span class="header-section-number">4</span> prepare data</a>
+  <ul class="collapse">
+  <li><a href="#set-up-data.frame" id="toc-set-up-data.frame" class="nav-link" data-scroll-target="#set-up-data.frame"><span class="header-section-number">4.1</span> set up data.frame</a></li>
+  </ul></li>
+  <li><a href="#reported-bugs" id="toc-reported-bugs" class="nav-link" data-scroll-target="#reported-bugs"><span class="header-section-number">5</span> reported bugs</a>
+  <ul class="collapse">
+  <li><a href="#save-screenshots" id="toc-save-screenshots" class="nav-link" data-scroll-target="#save-screenshots"><span class="header-section-number">5.1</span> save screenshots</a></li>
+  </ul></li>
+  <li><a href="#reported-possible-improvements" id="toc-reported-possible-improvements" class="nav-link" data-scroll-target="#reported-possible-improvements"><span class="header-section-number">6</span> reported possible improvements</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Get results of study bug reporting, improvements</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Julius Fenn </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="notes" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Notes</h1>
+</section>
+<section id="global-variables" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> global variables</h1>
+<p>Define your global variables:</p>
+</section>
+<section id="create-raw-data-files" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> create raw data files</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sets the directory of location of this script as the current directory</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># setwd(dirname(rstudioapi::getSourceEditorContext()$path))</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="do">### load packages</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># devtools::install_github('jdwilson4/multilayer_extraction')</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(pacman)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">p_load</span>(<span class="st">'tidyverse'</span>, <span class="st">'jsonlite'</span>, <span class="st">'magrittr'</span>, <span class="st">'xlsx'</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>       <span class="st">'stargazer'</span>, <span class="st">'psych'</span>, <span class="st">'jtools'</span>, <span class="st">'DT'</span>, <span class="st">'ggstatsplot'</span>, </span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>       <span class="st">'ggplot2'</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>       <span class="st">'base64enc'</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="do">### list data files</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"data"</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="fu">dir</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "jatos_results_data_20240430143549.txt"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">read_file</span>(<span class="st">'jatos_results_data_20240430143549.txt'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ... split it into lines ...</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">str_split</span>(<span class="st">'</span><span class="sc">\n</span><span class="st">'</span>) <span class="sc">%&gt;%</span> <span class="fu">first</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ... filter empty rows ...</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">discard</span>(<span class="cf">function</span>(x) x <span class="sc">==</span> <span class="st">''</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ... parse JSON into a data.frame</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map_dfr</span>(fromJSON, <span class="at">flatten=</span><span class="cn">TRUE</span>)) <span class="ot">-&gt;</span> dat</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="do">### load functions</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"../functions"</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(<span class="fu">dir</span>())){</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="co"># print(dir()[i])</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">source</span>(<span class="fu">dir</span>()[i], <span class="at">encoding =</span> <span class="st">"utf-8"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(i)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="prepare-data" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> prepare data</h1>
+<section id="set-up-data.frame" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="set-up-data.frame"><span class="header-section-number">4.1</span> set up data.frame</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">########################################</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># create counter variable for data set</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="do">########################################</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>ID <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>tmp_IDcounter <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dat)){</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(dat<span class="sc">$</span>sender[i]) <span class="sc">&amp;&amp;</span> dat<span class="sc">$</span>sender[i] <span class="sc">==</span> <span class="st">"Report"</span>){</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># tmp &lt;- dat$prolific_pid[i]</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    tmp_IDcounter <span class="ot">=</span> tmp_IDcounter <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  dat<span class="sc">$</span>ID[i] <span class="ot">&lt;-</span> tmp_IDcounter</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="do">########################################</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only complete data sets</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="do">########################################</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">table</span>(dat<span class="sc">$</span>ID) <span class="sc">!=</span> <span class="fu">max</span>(<span class="fu">table</span>(dat<span class="sc">$</span>ID)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">table</span>(dat<span class="sc">$</span>ID) <span class="sc">==</span> <span class="fu">max</span>(<span class="fu">table</span>(dat<span class="sc">$</span>ID)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 21</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> dat[dat<span class="sc">$</span>ID <span class="sc">%in%</span> <span class="fu">names</span>(<span class="fu">table</span>(dat<span class="sc">$</span>ID))[<span class="fu">table</span>(dat<span class="sc">$</span>ID) <span class="sc">==</span> <span class="fu">max</span>(<span class="fu">table</span>(dat<span class="sc">$</span>ID))],]</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">########################################</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># json (from JATOS) to 2D data.frame</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="do">########################################</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>tmp_notNumeric <span class="ot">&lt;-</span> <span class="fu">str_subset</span>(<span class="at">string =</span> <span class="fu">colnames</span>(dat), <span class="at">pattern =</span> <span class="st">"^meta"</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>tmp_notNumeric <span class="ot">&lt;-</span> <span class="fu">str_subset</span>(<span class="at">string =</span> tmp_notNumeric, <span class="at">pattern =</span> <span class="st">"labjs|location"</span>, <span class="at">negate =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># "bug_browser_used_additional"</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># tmp_notNumeric</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>vec_ques <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"dummy_type"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_tool"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_CAMEL_element"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_CAMApp_part"</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_Webpage_part"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_browser_used"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>              <span class="st">"automatic_browser"</span>, <span class="st">"automatic_browser2"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>              <span class="st">"automatic_browserVersion"</span>, <span class="st">"automatic_operatingSystem"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_text"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>              <span class="st">"Base64Image"</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>              <span class="st">"bug_code"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_tool"</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_CAMEL_element"</span>,</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_CAMEL_text"</span>,</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_CAMEL_importance"</span>,</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_CAMApp_part"</span>,</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_CAMApp_text"</span>,</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_CAMApp_importance"</span>,</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_Webpage_part"</span>,</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_Webpage_text"</span>,</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>              <span class="st">"improvement_Webpage_importance"</span>,</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>              </span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>              <span class="st">"feedback_critic"</span>)</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>vec_notNumeric <span class="ot">=</span> vec_ques</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>questionnaire <span class="ot">&lt;-</span> <span class="fu">questionnairetype</span>(<span class="at">dataset =</span> dat, </span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">listvars =</span> vec_ques, </span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">notNumeric =</span> vec_notNumeric)</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>dat_pictures <span class="ot">&lt;-</span> questionnaire[, <span class="fu">c</span>(<span class="st">"ID"</span>, <span class="st">"Base64Image"</span>)]</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>dat_pictures<span class="sc">$</span>Base64Image <span class="ot">&lt;-</span> <span class="fu">str_remove_all</span>(<span class="at">string =</span> dat_pictures<span class="sc">$</span>Base64Image, <span class="at">pattern =</span> <span class="st">"data:image/png;base64,"</span>)</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>questionnaire<span class="sc">$</span>Base64Image <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="reported-bugs" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> reported bugs</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"outputs"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="do">## dynamic table for CAMEL</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> questionnaire[questionnaire<span class="sc">$</span>bug_tool <span class="sc">==</span> <span class="st">"CAMEL"</span>,]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="fu">str_detect</span>(<span class="at">string =</span> <span class="fu">colnames</span>(tmp_dat), <span class="at">pattern =</span> <span class="st">"improvement"</span>, <span class="at">negate =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="sc">!</span><span class="fu">colnames</span>(tmp_dat) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bug_CAMApp_part"</span>, <span class="st">"bug_Webpage_part"</span>)]</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(tmp_dat, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div class="datatables html-widget html-fill-item" id="htmlwidget-6be790b31e71bbe0fb05" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-6be790b31e71bbe0fb05">{"x":{"filter":"none","vertical":false,"data":[["6","12","14","15","16","17","19"],[6,12,14,15,16,17,19],["bug","bug","bug","bug","bug","bug","bug"],["CAMEL","CAMEL","CAMEL","CAMEL","CAMEL","CAMEL","CAMEL"],["connection","connection","concept","other","concept","concept","concept"],["right","right","right","right","right","right","right"],["Firefox","Firefox","Safari","Safari","Safari","Safari","Safari"],["Firefox","Firefox","Safari","Safari","Safari","Safari","Safari"],["124","124","17","17","17","17","17"],["Windows 10","Windows 10","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS"],["","If connected concepts are too close to one another the arrow head is flipping. This seems to be the case for the whole drawing window of CAMEL and is not related to the concept type (pos., neg., ..). ","Concepts can be moved so that they are partially outside the boarder of the drawing surface","This is a spelling error, but it's easier to describe with a screenshot: First word in the screenshot should be \"Your\"","When I drag a concept outside the boarder of the drawing surface, then let loose on the left mouse button and then move back into the drawing surface, the concept can still be moved even though the left mouse button is not pressed anymore. Pressing the mouse button again ends this behavior. This does not impair functionality, but maybe an unexpected behavior...","If concepts are too close together, you can not differentiate between supportive and inhibitive connections anymore by just looking at the CAM. The screenshot shows one supportive and one inhibitive connection (but they look the same)","When opening the link for maximal settings (https://camgalaxy.github.io/?cameraFeature=true&amp;fullScreen=true&amp;ShowResearcherButtons=true&amp;hideArrows=false&amp;hideAmbivalent=false&amp;showSliderAgreementOnly=false), the concepts move around the canvas by themselves, without me even clicking on them. The contents of the concepts do not change, but they jump in their location, both in the y and x axis. This is the case for both the first predefined concept, as well as for a second concept I added. "],["","","","","","",""],["","","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>dummy_type<\/th>\n      <th>bug_tool<\/th>\n      <th>bug_CAMEL_element<\/th>\n      <th>bug_browser_used<\/th>\n      <th>automatic_browser<\/th>\n      <th>automatic_browser2<\/th>\n      <th>automatic_browserVersion<\/th>\n      <th>automatic_operatingSystem<\/th>\n      <th>bug_text<\/th>\n      <th>bug_code<\/th>\n      <th>feedback_critic<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"ID","targets":1},{"name":"dummy_type","targets":2},{"name":"bug_tool","targets":3},{"name":"bug_CAMEL_element","targets":4},{"name":"bug_browser_used","targets":5},{"name":"automatic_browser","targets":6},{"name":"automatic_browser2","targets":7},{"name":"automatic_browserVersion","targets":8},{"name":"automatic_operatingSystem","targets":9},{"name":"bug_text","targets":10},{"name":"bug_code","targets":11},{"name":"feedback_critic","targets":12}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; save as .xlsx</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>xlsx<span class="sc">::</span><span class="fu">write.xlsx2</span>(<span class="at">x =</span> tmp_dat, <span class="at">file =</span> <span class="st">"bugs_CAMEL.xlsx"</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="do">## dynamic table for CAMApp</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> questionnaire[questionnaire<span class="sc">$</span>bug_tool <span class="sc">==</span> <span class="st">"CAMApp"</span>,]</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="fu">str_detect</span>(<span class="at">string =</span> <span class="fu">colnames</span>(tmp_dat), <span class="at">pattern =</span> <span class="st">"improvement"</span>, <span class="at">negate =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="sc">!</span><span class="fu">colnames</span>(tmp_dat) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bug_CAMEL_element"</span>, <span class="st">"bug_Webpage_part"</span>)]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(tmp_dat, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div class="datatables html-widget html-fill-item" id="htmlwidget-aeaae17a4cf2a4951f37" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-aeaae17a4cf2a4951f37">{"x":{"filter":"none","vertical":false,"data":[["1","5","21"],[1,5,21],["bug","bug","bug"],["CAMApp","CAMApp","CAMApp"],["analysis","upload","preprocessing"],["wrong","right","wrong"],["Firefox","Safari","Firefox"],["Firefox","Safari","Firefox"],["125","17","124"],["Windows 10","Mac/iOS","Windows 10"],["num_edges_macro kommt zum Ergebnis, welches der doppelten Anzahl an Verbindungen in einer CAM entspricht. \nDies passiert beim hochladen der Rohdaten aus Jatos bereits wenn man die unbearbeitet Daten im Analyse Part verarbeitet und die network indicators kalkuliert. \n","Right after the webpage is loaded (with slow internet), the layout is slightly different from the normal layout (see screenshot). Shortly after, it switches to the normal layout","Im Teil \"Summarize by approximate matching\" lassen sich Worte die in den Boxen dargestellt werden nicht per Drag&amp;Drop verschieben.\n\n"],["","","&gt; runApp('Zielbereiche/Profession/Akademische Laufbahn/Psychologie Master/Masterarbeit/Apps/DataAnalysis-main/DataAnalysis-main')\nWarnung: Navigation containers expect a collection of `bslib::nav_panel()`/`shiny::tabPanel()`s and/or `bslib::nav_menu()`/`shiny::navbarMenu()`s. Consider using `header` or `footer` if you wish to place content above (or below) every panel's contents.\n\nListening on http://127.0.0.1:3071\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\n`shiny::renderDataTable()` is deprecated as of shiny 1.8.1.\nPlease use `DT::renderDT()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\nNodes and connectors, which were deleted by participants were removed.                                                                                                                                                               \n # deleted nodes:  17 \n # deleted connectors:  10uploaded file(s) - extensions:txt\nsuccessfully uploaded data!\nprocessing 7 CAMs... \n[1] \"== participantCAM in drawnCAM\"\nsuccessfully drawn CAMs!\n[1] \"== participantCAM\"\n[1] \"mean valence\"\n[1] \"mean valence\"\n[1] \"== participantCAM\"\n[1] \"mean valence\"\n[1] \"mean valence\"\n[1] \"== participantCAM delete\"\n[1] \"ST_rv$counter\"\n[1] 0\n`shiny::dataTableOutput()` is deprecated as of shiny 1.8.1.\nPlease use `DT::DTOutput()` instead.\nSee &lt;https://rstudio.github.io/DT/shiny.html&gt; for more information.\nThe value of input$clickAproxStriMatch is 0\n[1] \"dat_out\"\n  num        word\n1   1  ressourcen\n2   1  Ressourcen\n3   2   wohlstand\n4   2   Wohlstand\n5   3 klimawandel\n6   3 Klimawandel\n[1] \"Counter labels bucketlist:\"\n[1] 1\n[1] \"Counter labels bucketlist:\"\n[1] 1\n[1] \"Counter labels bucketlist:\"\n[1] 1\n[1] \"Counter labels bucketlist:\"\n[1] 1"],["","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>dummy_type<\/th>\n      <th>bug_tool<\/th>\n      <th>bug_CAMApp_part<\/th>\n      <th>bug_browser_used<\/th>\n      <th>automatic_browser<\/th>\n      <th>automatic_browser2<\/th>\n      <th>automatic_browserVersion<\/th>\n      <th>automatic_operatingSystem<\/th>\n      <th>bug_text<\/th>\n      <th>bug_code<\/th>\n      <th>feedback_critic<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"ID","targets":1},{"name":"dummy_type","targets":2},{"name":"bug_tool","targets":3},{"name":"bug_CAMApp_part","targets":4},{"name":"bug_browser_used","targets":5},{"name":"automatic_browser","targets":6},{"name":"automatic_browser2","targets":7},{"name":"automatic_browserVersion","targets":8},{"name":"automatic_operatingSystem","targets":9},{"name":"bug_text","targets":10},{"name":"bug_code","targets":11},{"name":"feedback_critic","targets":12}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; save as .xlsx</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>xlsx<span class="sc">::</span><span class="fu">write.xlsx2</span>(<span class="at">x =</span> tmp_dat, <span class="at">file =</span> <span class="st">"bugs_CAMApp.xlsx"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="do">## dynamic table for CAMEL</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> questionnaire[questionnaire<span class="sc">$</span>bug_tool <span class="sc">==</span> <span class="st">"Webpage"</span>,]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="fu">str_detect</span>(<span class="at">string =</span> <span class="fu">colnames</span>(tmp_dat), <span class="at">pattern =</span> <span class="st">"improvement"</span>, <span class="at">negate =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="sc">!</span><span class="fu">colnames</span>(tmp_dat) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bug_CAMEL_element"</span>, <span class="st">"bug_CAMApp_part"</span>)]</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(tmp_dat, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div class="datatables html-widget html-fill-item" id="htmlwidget-f8f0a0c65ca32f665095" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-f8f0a0c65ca32f665095">{"x":{"filter":"none","vertical":false,"data":[["2","3","4","7","8","9","10","11","13"],[2,3,4,7,8,9,10,11,13],["bug","bug","bug","bug","bug","bug","bug","bug","bug"],["Webpage","Webpage","Webpage","Webpage","Webpage","Webpage","Webpage","Webpage","Webpage"],["beforeLogIn","beforeLogIn","beforeLogIn","other","other","afterLogIn","afterLogIn","afterLogIn","afterLogIn"],["right","right","right","right","right","right","right","right","right"],["Safari","Safari","Safari","Safari","Safari","Safari","Safari","Safari","Safari"],["Safari","Safari","Safari","Safari","Safari","Safari","Safari","Safari","Safari"],["17","17","17","17","17","17","17","17","17"],["Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS","Mac/iOS"],["When clicking on the Twitter and Youtube buttons on the bottom left, no link is opened (nothing happens). Other buttons work fine","When clicking on the bottom left text (\"Made by Julius Fenn and Florian Gouret (server administration supported by Paul Hüttner; project supervised by Prof. Andrea Kiesel\"), this reloads the Home page. I don't know wether that is intended or not ;) ","The second line is slightly indent, is that on purpose? (see screenshot). Also, the exclamation mark is separated by a whitespace ;) ","After logging in and then logging out again, the button on the top right still shows \"log out\", even though it should show \"log in\" at this point. When clicking on it, the page just refreshes and I cant log in again. Refreshing the page also does not help. To log in again, I have to close the page and open it again. ","Regarding the log in - log out bug I just reported: actually just closing the page and opening it again in the same browser does not help, I have to close the browser and open it again to be able to log in again ","When logging in, I land on a page showing my different experiments (I assume that is the dashboard). After clicking on the \"Dashboard\" button, I land on the landing page and there is no way to get back to the list of experiments.","When clicking on the button that should connect to the C.A.M.E.L. researcher view, the page does not load. This happened at multiple days with good internet connection. ","I don't know wether the experiments in the test account should work at the moment, if not, ignore this report. Otherwise: when clicking on the \"copy link\" button, a link is correctly copied, but when trying to open the link, the web page does not load. ","After changing the status of an experiment (from active to inactive or the other way around), an error message pops up (see screenshot). When going back to the previous page, the status is changed correctly though. "],["","","","","","","","",""],["","","","","","","","",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>dummy_type<\/th>\n      <th>bug_tool<\/th>\n      <th>bug_Webpage_part<\/th>\n      <th>bug_browser_used<\/th>\n      <th>automatic_browser<\/th>\n      <th>automatic_browser2<\/th>\n      <th>automatic_browserVersion<\/th>\n      <th>automatic_operatingSystem<\/th>\n      <th>bug_text<\/th>\n      <th>bug_code<\/th>\n      <th>feedback_critic<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"ID","targets":1},{"name":"dummy_type","targets":2},{"name":"bug_tool","targets":3},{"name":"bug_Webpage_part","targets":4},{"name":"bug_browser_used","targets":5},{"name":"automatic_browser","targets":6},{"name":"automatic_browser2","targets":7},{"name":"automatic_browserVersion","targets":8},{"name":"automatic_operatingSystem","targets":9},{"name":"bug_text","targets":10},{"name":"bug_code","targets":11},{"name":"feedback_critic","targets":12}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; save as .xlsx</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>xlsx<span class="sc">::</span><span class="fu">write.xlsx2</span>(<span class="at">x =</span> tmp_dat, <span class="at">file =</span> <span class="st">"bugs_Webpage.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="save-screenshots" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="save-screenshots"><span class="header-section-number">5.1</span> save screenshots</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"outputs/screenshots"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(dat_pictures)){</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span>(<span class="sc">!</span><span class="fu">is.na</span>(dat_pictures<span class="sc">$</span>Base64Image[i])){</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    binary_data <span class="ot">&lt;-</span> base64enc<span class="sc">::</span><span class="fu">base64decode</span>(<span class="at">what =</span> dat_pictures<span class="sc">$</span>Base64Image[i])</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">writeBin</span>(binary_data, <span class="fu">paste0</span>(dat_pictures<span class="sc">$</span>ID[i], <span class="st">"_screenshot.png"</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="reported-possible-improvements" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> reported possible improvements</h1>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">setwd</span>(<span class="st">"outputs"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="do">## dynamic table for suggested improvements</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> questionnaire[questionnaire<span class="sc">$</span>dummy_type <span class="sc">==</span> <span class="st">"improvement"</span>,]</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="fu">str_detect</span>(<span class="at">string =</span> <span class="fu">colnames</span>(tmp_dat), <span class="at">pattern =</span> <span class="st">"bug"</span>, <span class="at">negate =</span> <span class="cn">TRUE</span>)]</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>tmp_dat <span class="ot">&lt;-</span> tmp_dat[, <span class="sc">!</span><span class="fu">colnames</span>(tmp_dat) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"bug"</span>)]</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>DT<span class="sc">::</span><span class="fu">datatable</span>(tmp_dat, <span class="at">options =</span> <span class="fu">list</span>(<span class="at">pageLength =</span> <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div class="datatables html-widget html-fill-item" id="htmlwidget-67bee233e12f22f9fd8c" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-67bee233e12f22f9fd8c">{"x":{"filter":"none","vertical":false,"data":[["18","20"],[18,20],["improvement","improvement"],["Safari","Safari"],["Safari","Safari"],["17","17"],["Mac/iOS","Mac/iOS"],["CAMEL","CAMApp"],["concept",""],["There does not seem to be a limit on the number of words you can write in the \"comment\" for a specific concept. It might be useful to have a limitation here in order to avoid overly long comments. ",""],["3",""],["","analysis"],["","It would be super nice to be able to go straight from pre-processing to analysis without having to download the data first, then start the app again, upload the data, ..."],["","7"],["",""],["",""],["",""],["",""]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>ID<\/th>\n      <th>dummy_type<\/th>\n      <th>automatic_browser<\/th>\n      <th>automatic_browser2<\/th>\n      <th>automatic_browserVersion<\/th>\n      <th>automatic_operatingSystem<\/th>\n      <th>improvement_tool<\/th>\n      <th>improvement_CAMEL_element<\/th>\n      <th>improvement_CAMEL_text<\/th>\n      <th>improvement_CAMEL_importance<\/th>\n      <th>improvement_CAMApp_part<\/th>\n      <th>improvement_CAMApp_text<\/th>\n      <th>improvement_CAMApp_importance<\/th>\n      <th>improvement_Webpage_part<\/th>\n      <th>improvement_Webpage_text<\/th>\n      <th>improvement_Webpage_importance<\/th>\n      <th>feedback_critic<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"pageLength":5,"columnDefs":[{"className":"dt-right","targets":1},{"orderable":false,"targets":0},{"name":" ","targets":0},{"name":"ID","targets":1},{"name":"dummy_type","targets":2},{"name":"automatic_browser","targets":3},{"name":"automatic_browser2","targets":4},{"name":"automatic_browserVersion","targets":5},{"name":"automatic_operatingSystem","targets":6},{"name":"improvement_tool","targets":7},{"name":"improvement_CAMEL_element","targets":8},{"name":"improvement_CAMEL_text","targets":9},{"name":"improvement_CAMEL_importance","targets":10},{"name":"improvement_CAMApp_part","targets":11},{"name":"improvement_CAMApp_text","targets":12},{"name":"improvement_CAMApp_importance","targets":13},{"name":"improvement_Webpage_part","targets":14},{"name":"improvement_Webpage_text","targets":15},{"name":"improvement_Webpage_importance","targets":16},{"name":"feedback_critic","targets":17}],"order":[],"autoWidth":false,"orderClasses":false,"lengthMenu":[5,10,25,50,100]}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; save as .xlsx</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>xlsx<span class="sc">::</span><span class="fu">write.xlsx2</span>(<span class="at">x =</span> tmp_dat, <span class="at">file =</span> <span class="st">"improvements.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
