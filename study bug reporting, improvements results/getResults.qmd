@@ -141,8 +141,6 @@ questionnaire <- questionnairetype(dataset = dat,
                                         notNumeric = vec_notNumeric)
 
 dat_pictures <- questionnaire[, c("ID", "Base64Image")]
-dat_pictures$Base64Image <- str_remove_all(string = dat_pictures$Base64Image, pattern = "data:image/png;base64,")
-
 
 
 questionnaire$Base64Image <- NULL
@@ -193,8 +191,18 @@ xlsx::write.xlsx2(x = tmp_dat, file = "bugs_Webpage.xlsx")
 setwd("outputs/screenshots")
 for(i in 1:nrow(dat_pictures)){
   if(!is.na(dat_pictures$Base64Image[i])){
+    if(str_detect(string = dat_pictures$Base64Image[i], pattern = "data:application/pdf;base64,")){
+  dat_pictures$Base64Image[i] <- str_remove_all(string = dat_pictures$Base64Image[i], pattern = "data:application/pdf;base64,")
+  tmp_name <- "pdf"
+}else if(str_detect(string = dat_pictures$Base64Image[i], pattern = "data:image/png;base64,")){
+  dat_pictures$Base64Image[i] <- str_remove_all(string = dat_pictures$Base64Image[i], pattern = "data:image/png;base64,")
+  tmp_name <- "png"
+}else if(str_detect(string = dat_pictures$Base64Image[i], pattern = "data:image/jpeg;base64,")){
+    dat_pictures$Base64Image[i] <- str_remove_all(string = dat_pictures$Base64Image[i], pattern = "data:image/jpeg;base64,")
+    tmp_name <- "jpeg"
+}
     binary_data <- base64enc::base64decode(what = dat_pictures$Base64Image[i])
-    writeBin(binary_data, paste0(dat_pictures$ID[i], "_screenshot.png"))
+    writeBin(binary_data, paste0(dat_pictures$ID[i], "_screenshot.", tmp_name))
   }
 }
 ```
