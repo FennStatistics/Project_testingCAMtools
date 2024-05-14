@@ -47,7 +47,7 @@ p_load('tidyverse', 'jsonlite', 'magrittr', 'xlsx',
 setwd("data")
 dir()
 
-suppressMessages(read_file('jatos_results_data_20240430143549.txt') %>%
+suppressMessages(read_file('jatos_results_data_20240514064500.txt') %>%
   # ... split it into lines ...
   str_split('\n') %>% first() %>%
   # ... filter empty rows ...
@@ -140,6 +140,14 @@ questionnaire <- questionnairetype(dataset = dat,
                                         listvars = vec_ques, 
                                         notNumeric = vec_notNumeric)
 
+questionnaire$bug_browser_used_additional <- NA
+for(i in 1:nrow(questionnaire)){
+  tmp_dat <- dat[dat$ID == unique(questionnaire$ID)[i], ]
+  questionnaire$bug_browser_used_additional[i] <- paste0(unlist(tmp_dat$bug_browser_used_additional), collapse = " \\ ")
+}
+questionnaire$bug_browser_used_additional[questionnaire$bug_browser_used_additional == ""] <- NA
+
+
 dat_pictures <- questionnaire[, c("ID", "Base64Image")]
 
 
@@ -147,45 +155,77 @@ questionnaire$Base64Image <- NULL
 
 
 ```
+# overview
+
+```{r}
+table(questionnaire$dummy_type)
+table(questionnaire$bug_tool)
+
+
+table(questionnaire$bug_tool, questionnaire$bug_CAMEL_element)
+table(questionnaire$bug_tool, questionnaire$bug_CAMApp_part)
+table(questionnaire$bug_tool, questionnaire$bug_Webpage_part)
+```
+
+
+
 
 # reported bugs
 
+## for CAMEL
 
 ```{r}
 setwd("outputs")
-
 
 ## dynamic table for CAMEL
 tmp_dat <- questionnaire[questionnaire$bug_tool == "CAMEL",]
 tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "improvement", negate = TRUE)]
 tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug_CAMApp_part", "bug_Webpage_part")]
+nrow(tmp_dat)
+
 
 DT::datatable(tmp_dat, options = list(pageLength = 5))
 #> save as .xlsx
 xlsx::write.xlsx2(x = tmp_dat, file = "bugs_CAMEL.xlsx")
+```
+## for CAMApp
+
+
+```{r}
+setwd("outputs")
 
 ## dynamic table for CAMApp
 tmp_dat <- questionnaire[questionnaire$bug_tool == "CAMApp",]
 tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "improvement", negate = TRUE)]
 tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug_CAMEL_element", "bug_Webpage_part")]
+nrow(tmp_dat)
+
 
 DT::datatable(tmp_dat, options = list(pageLength = 5))
 #> save as .xlsx
 xlsx::write.xlsx2(x = tmp_dat, file = "bugs_CAMApp.xlsx")
+```
 
 
-## dynamic table for CAMEL
+
+## for Webpage
+
+```{r}
+setwd("outputs")
+
+## dynamic table for Webpage
 tmp_dat <- questionnaire[questionnaire$bug_tool == "Webpage",]
 tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "improvement", negate = TRUE)]
 tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug_CAMEL_element", "bug_CAMApp_part")]
+nrow(tmp_dat)
+
 
 DT::datatable(tmp_dat, options = list(pageLength = 5))
 #> save as .xlsx
 xlsx::write.xlsx2(x = tmp_dat, file = "bugs_Webpage.xlsx")
 ```
 
-
-## save screenshots
+# save screenshots
 
 ```{r}
 setwd("outputs/screenshots")
@@ -200,6 +240,8 @@ for(i in 1:nrow(dat_pictures)){
 }else if(str_detect(string = dat_pictures$Base64Image[i], pattern = "data:image/jpeg;base64,")){
     dat_pictures$Base64Image[i] <- str_remove_all(string = dat_pictures$Base64Image[i], pattern = "data:image/jpeg;base64,")
     tmp_name <- "jpeg"
+}else{
+  print(i)
 }
     binary_data <- base64enc::base64decode(what = dat_pictures$Base64Image[i])
     writeBin(binary_data, paste0(dat_pictures$ID[i], "_screenshot.", tmp_name))
@@ -220,6 +262,8 @@ setwd("outputs")
 tmp_dat <- questionnaire[questionnaire$dummy_type == "improvement",]
 tmp_dat <- tmp_dat[, str_detect(string = colnames(tmp_dat), pattern = "bug", negate = TRUE)]
 tmp_dat <- tmp_dat[, !colnames(tmp_dat) %in% c("bug")]
+nrow(tmp_dat)
+
 
 DT::datatable(tmp_dat, options = list(pageLength = 5))
 #> save as .xlsx
